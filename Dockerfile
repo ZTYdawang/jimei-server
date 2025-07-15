@@ -4,11 +4,11 @@ FROM node:18-alpine
 # 在容器中创建一个目录来存放应用代码
 WORKDIR /app
 
-# 复制 package.json 和 package-lock.json
+# 复制 package.json 和 package-lock.json 到工作目录
 COPY package*.json ./
 
-# 在容器内部安装生产环境依赖
-RUN npm install --only=production
+# 安装生产环境依赖
+RUN npm ci --only=production
 
 # 复制所有剩余的应用代码
 COPY . .

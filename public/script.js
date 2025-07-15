@@ -35,10 +35,10 @@ async function initializeApp() {
         await createConversation();
         
         // 初始化语音识别
-        // initSpeechRecognition(); // 移除旧的语音识别初始化
+        initSpeechRecognition();
         
         // 检查语音权限
-        await checkVoicePermission();
+        checkVoicePermission();
         
         console.log('✅ 应用初始化完成');
     } catch (error) {
@@ -222,56 +222,62 @@ async function startVoiceRecording(e) {
     if (isRecording) return;
     
     // 优先使用语音识别API
-    // if (isUsingSpeechAPI && speechRecognition) { // 移除旧的语音识别逻辑
-    //     try {
-    //         isRecording = true;
+    if (isUsingSpeechAPI && speechRecognition) {
+        try {
+            isRecording = true;
             
-    //         // 更新UI状态
-    //         elements.voiceBtn.classList.add('recording');
-    //         elements.voiceModal.classList.remove('hidden');
-    //         elements.voiceText.textContent = '正在识别语音...';
-    //         elements.voiceTips.textContent = '请说话，松开按钮结束';
+            // 更新UI状态
+            elements.voiceBtn.classList.add('recording');
+            elements.voiceModal.classList.remove('hidden');
+            elements.voiceText.textContent = '正在识别语音...';
+            elements.voiceTips.textContent = '请说话，松开按钮结束';
             
-    //         // 开始语音识别
-    //         speechRecognition.start();
-    //         console.log('🎤 开始语音识别');
+            // 开始语音识别
+            speechRecognition.start();
+            console.log('🎤 开始语音识别');
             
-    //     } catch (error) {
-    //         console.error('❌ 语音识别启动失败:', error);
-    //         showError('语音识别启动失败，请重试');
-    //         isRecording = false;
-    //         elements.voiceBtn.classList.remove('recording');
-    //         elements.voiceModal.classList.add('hidden');
-    //     }
-    //     return;
-    // }
+        } catch (error) {
+            console.error('❌ 语音识别启动失败:', error);
+            showError('语音识别启动失败，请重试');
+            isRecording = false;
+            elements.voiceBtn.classList.remove('recording');
+            elements.voiceModal.classList.add('hidden');
+        }
+        return;
+    }
     
     // 回退到录音模式
     try {
-        isRecording = true;
-        audioChunks = []; // 清空之前的录音数据
-
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
-
-        mediaRecorder.addEventListener('dataavailable', event => {
-            audioChunks.push(event.data);
-        });
-
-        mediaRecorder.addEventListener('stop', handleVoiceInput);
-
-        mediaRecorder.start();
-
-        // 更新UI
+        
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
+        isRecording = true;
+        
+        // 更新UI状态
         elements.voiceBtn.classList.add('recording');
         elements.voiceModal.classList.remove('hidden');
-        elements.voiceText.textContent = '正在聆听...';
+        elements.voiceText.textContent = '正在录音中...';
         elements.voiceTips.textContent = '松开按钮结束录音';
-        console.log('🎤 开始录音...');
-
-    } catch (err) {
-        console.error('❌ 无法获取麦克风:', err);
-        showError('无法访问麦克风，请检查权限');
+        
+        mediaRecorder.ondataavailable = function(event) {
+            audioChunks.push(event.data);
+        };
+        
+        mediaRecorder.onstop = function() {
+            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+            handleVoiceInput(audioBlob);
+            
+            // 停止所有音轨
+            stream.getTracks().forEach(track => track.stop());
+        };
+        
+        mediaRecorder.start();
+        console.log('🎤 开始录音');
+        
+    } catch (error) {
+        console.error('❌ 录音失败:', error);
+        showError('无法访问麦克风，请检查权限设置');
         isRecording = false;
     }
 }
@@ -279,67 +285,139 @@ async function startVoiceRecording(e) {
 // 停止语音录制
 function stopVoiceRecording(e) {
     e.preventDefault();
-    if (!isRecording || !mediaRecorder) return;
-
-    mediaRecorder.stop();
-    isRecording = false;
     
-    // 停止所有媒体流轨道，释放麦克风
-    if (mediaRecorder.stream) {
-        mediaRecorder.stream.getTracks().forEach(track => track.stop());
-    }
-
-    elements.voiceBtn.classList.remove('recording');
-    elements.voiceModal.classList.add('hidden');
-    console.log('🛑 录音结束');
-}
-
-// (此函数已废弃)
-// function initSpeechRecognition() { ... }
-
-// 处理语音输入，发送到后端
-async function handleVoiceInput() {
-    if (audioChunks.length === 0) {
-        console.warn('⚠️ 录音数据为空，不发送');
+    if (!isRecording) return;
+    
+    // 如果使用语音识别API
+    if (isUsingSpeechAPI && speechRecognition) {
+        try {
+            speechRecognition.stop();
+            console.log('🎤 停止语音识别');
+        } catch (error) {
+            console.error('❌ 停止语音识别失败:', error);
+        }
+        isRecording = false;
+        elements.voiceBtn.classList.remove('recording');
         return;
     }
-
-    elements.voiceText.textContent = '正在识别...';
     
-    // 将录音块合并成一个Blob对象
-    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-    
-    const formData = new FormData();
-    formData.append('audio', audioBlob, 'recording.webm');
-
-    try {
-        const response = await fetch('/api/speech-to-text', {
-            method: 'POST',
-            body: formData
-        });
-
-        const data = await response.json();
-
-        if (response.ok && data.success) {
-            console.log('✅ 语音识别成功:', data.text);
-            elements.messageInput.value = data.text;
-            elements.messageInput.focus();
-            // 触发input事件以启用发送按钮
-            elements.messageInput.dispatchEvent(new Event('input'));
-        } else {
-            throw new Error(data.message || '语音识别失败');
-        }
-    } catch (error) {
-        console.error('❌ 语音识别请求失败:', error);
-        showError(error.message || '语音识别失败，请重试');
-    } finally {
-        // 重置录音数据
-        audioChunks = [];
+    // 录音模式
+    if (mediaRecorder) {
+        mediaRecorder.stop();
+        isRecording = false;
+        
+        // 更新UI状态
+        elements.voiceBtn.classList.remove('recording');
+        elements.voiceModal.classList.add('hidden');
+        
+        console.log('🎤 录音结束');
     }
 }
 
-// 检查麦克风权限
-async function checkVoicePermission() {
+// 语音识别相关变量
+let speechRecognition = null;
+let isUsingSpeechAPI = false;
+
+// 初始化语音识别
+function initSpeechRecognition() {
+    // 检查浏览器是否支持语音识别
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        speechRecognition = new SpeechRecognition();
+        
+        // 配置语音识别
+        speechRecognition.continuous = false;
+        speechRecognition.interimResults = false;
+        speechRecognition.lang = 'zh-CN'; // 设置为中文
+        speechRecognition.maxAlternatives = 1;
+        
+        // 识别结果处理
+        speechRecognition.onresult = function(event) {
+            const transcript = event.results[0][0].transcript;
+            console.log('🎤 语音识别结果:', transcript);
+            
+            // 将识别结果填入输入框
+            elements.messageInput.value = transcript;
+            elements.sendBtn.disabled = false;
+            
+            // 自动聚焦到输入框
+            elements.messageInput.focus();
+            
+            showLoading(false);
+            elements.voiceModal.classList.add('hidden');
+        };
+        
+        // 错误处理
+        speechRecognition.onerror = function(event) {
+            console.error('❌ 语音识别错误:', event.error);
+            showLoading(false);
+            elements.voiceModal.classList.add('hidden');
+            
+            let errorMessage = '语音识别失败，请重试';
+            switch(event.error) {
+                case 'no-speech':
+                    errorMessage = '未检测到语音，请重试';
+                    break;
+                case 'audio-capture':
+                    errorMessage = '无法访问麦克风，请检查权限';
+                    break;
+                case 'not-allowed':
+                    errorMessage = '麦克风权限被拒绝，请允许访问';
+                    break;
+                case 'network':
+                    errorMessage = '网络错误，请检查网络连接';
+                    break;
+            }
+            showError(errorMessage);
+        };
+        
+        // 识别开始
+        speechRecognition.onstart = function() {
+            console.log('🎤 语音识别已开始');
+            elements.voiceText.textContent = '正在听取您的语音...';
+        };
+        
+        // 识别结束
+        speechRecognition.onend = function() {
+            console.log('🎤 语音识别结束');
+            isRecording = false;
+            elements.voiceBtn.classList.remove('recording');
+            showLoading(false);
+            elements.voiceModal.classList.add('hidden');
+        };
+        
+        isUsingSpeechAPI = true;
+        console.log('✅ 语音识别初始化成功');
+    } else {
+        console.log('⚠️ 浏览器不支持语音识别，使用录音模式');
+        isUsingSpeechAPI = false;
+    }
+}
+
+// 处理语音输入
+async function handleVoiceInput(audioBlob) {
+    // 如果使用的是语音识别API，这个函数不会被调用
+    // 这里保留录音模式的处理逻辑
+    
+    showLoading(true);
+    
+    try {
+        // 这里可以集成其他语音转文字服务
+        // 比如百度语音识别API、阿里云、腾讯云等
+        
+        // 暂时提示用户手动输入
+        showError('当前浏览器不支持语音识别，请手动输入或尝试其他浏览器');
+        
+    } catch (error) {
+        console.error('❌ 语音转文字失败:', error);
+        showError('语音识别失败，请重试');
+    } finally {
+        showLoading(false);
+    }
+}
+
+// 检查语音权限
+function checkVoicePermission() {
     // 检查是否支持语音识别或录音
     const hasSpeechRecognition = 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window;
     const hasMediaDevices = navigator.mediaDevices && navigator.mediaDevices.getUserMedia;
