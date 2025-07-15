@@ -27,18 +27,9 @@ USER nodejs
 EXPOSE 3000
 
 #
-# ---- 关键修改：使用 node 直接进行健康检查 ----
-#
-# 这个命令会每隔30秒尝试连接容器内的3000端口。
-# --interval=30s: 检查间隔
-# --timeout=10s: 超时时间
-# --start-period=40s: 启动宽限期
-# --retries=3: 重试次数
-# CMD [ "node", "-e", "require('http').request({host: 'localhost', port: 3000, path: '/api/health', method: 'GET'}, r => process.exit(r.statusCode === 200 ? 0 : 1)).end()" ]
-# 上面的原生 Node.js 检查在某些 shell 环境下可能存在问题，我们使用一个更简单、更通用的 wget 命令。
-# Alpine 默认包含 wget 的精简版。
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD wget -q --spider http://localhost:3000/api/health || exit 1
+# ---- 暂时移除健康检查以进行诊断 ----
+# HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+#   CMD wget -q --spider http://localhost:3000/api/health || exit 1
 
 # 定义容器启动时执行的命令
 CMD [ "npm", "start" ]
