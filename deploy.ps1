@@ -188,7 +188,7 @@ echo '📊 容器状态:'
 sudo docker-compose ps
 
 echo '🔍 检查应用健康状态:'
-if curl -f http://localhost:3000/api/health 2>/dev/null; then
+        if curl -f http://localhost:3001/api/health 2>/dev/null; then
     echo '✅ 应用健康检查通过'
 else
     echo '⚠️ 应用健康检查失败，查看日志:'
@@ -207,15 +207,15 @@ function Set-Firewall {
     
     $firewallScript = @"
 if command -v ufw >/dev/null 2>&1; then
-    sudo ufw allow 3000/tcp
+    sudo ufw allow 3001/tcp
     sudo ufw --force enable
     echo '✅ UFW防火墙配置完成'
 elif command -v firewall-cmd >/dev/null 2>&1; then
-    sudo firewall-cmd --permanent --add-port=3000/tcp
+    sudo firewall-cmd --permanent --add-port=3001/tcp
     sudo firewall-cmd --reload
     echo '✅ Firewalld防火墙配置完成'
 else
-    echo '⚠️ 未检测到防火墙管理工具，请手动开放3000端口'
+    echo '⚠️ 未检测到防火墙管理工具，请手动开放3001端口'
 fi
 "@
 
@@ -249,8 +249,8 @@ function Main {
         Write-Host "🎉 部署完成！" -ForegroundColor Green
         Write-Host "=============================================="
         Write-Host "📊 部署信息:" -ForegroundColor Cyan
-        Write-Host "   访问地址: http://$ServerIP:3000"
-        Write-Host "   健康检查: http://$ServerIP:3000/api/health"
+            Write-Host "   访问地址: http://$ServerIP:3001"
+    Write-Host "   健康检查: http://$ServerIP:3001/api/health"
         Write-Host ""
         Write-Host "🔧 常用管理命令:" -ForegroundColor Cyan
         Write-Host "   查看日志: ssh $Username@$ServerIP 'cd $RemoteDir && sudo docker-compose logs -f app'"

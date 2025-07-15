@@ -153,7 +153,7 @@ sudo docker-compose ps
 
 # 检查应用健康状态
 echo "🔍 检查应用健康状态:"
-if curl -f http://localhost:3000/api/health 2>/dev/null; then
+        if curl -f http://localhost:3001/api/health 2>/dev/null; then
     echo "✅ 应用健康检查通过"
 else
     echo "⚠️  应用健康检查失败，查看日志:"
@@ -168,15 +168,15 @@ setup_firewall() {
     
     $SSH_CMD << 'EOF'
 if command -v ufw >/dev/null 2>&1; then
-    sudo ufw allow 3000/tcp
+    sudo ufw allow 3001/tcp
     sudo ufw --force enable
     echo "✅ UFW防火墙配置完成"
 elif command -v firewall-cmd >/dev/null 2>&1; then
-    sudo firewall-cmd --permanent --add-port=3000/tcp
+    sudo firewall-cmd --permanent --add-port=3001/tcp
     sudo firewall-cmd --reload
     echo "✅ Firewalld防火墙配置完成"
 else
-    echo "⚠️  未检测到防火墙管理工具，请手动开放3000端口"
+    echo "⚠️  未检测到防火墙管理工具，请手动开放3001端口"
 fi
 EOF
 }
@@ -200,8 +200,8 @@ main() {
     echo "🎉 部署完成！"
     echo "=============================================="
     echo "📊 部署信息:"
-    echo "   访问地址: http://$SERVER_IP:3000"
-    echo "   健康检查: http://$SERVER_IP:3000/api/health"
+    echo "   访问地址: http://$SERVER_IP:3001"
+echo "   健康检查: http://$SERVER_IP:3001/api/health"
     echo ""
     echo "🔧 常用管理命令:"
     echo "   查看日志: ssh $USERNAME@$SERVER_IP 'cd $REMOTE_DIR && sudo docker-compose logs -f app'"
