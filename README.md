@@ -18,8 +18,8 @@
 
 1. **克隆项目**
 ```bash
-git clone <repository-url>
-cd jimei_customer_service
+git clone git@github.com:ZTYdawang/jimei-server.git
+cd jimei-server
 ```
 
 2. **安装依赖**
@@ -89,7 +89,7 @@ NODE_ENV=production
 ## 📁 项目结构
 
 ```
-jimei_customer_service/
+jimei-server/
 ├── public/                 # 前端静态文件
 │   ├── index.html         # 主页面
 │   ├── styles.css         # 样式文件
@@ -175,4 +175,4 @@ MIT License
 
 ## 📞 支持
 
-如有问题，请提交Issue或联系开发团队。 
+如有问题，请提交Issue或联系开发团队。
