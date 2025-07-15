@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>集美发展集团停车场助理 - 智能服务系统</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="icon.png" type="image/png">
+</head>
+<body>
+    <div class="app-container">
+        <!-- 头部 -->
+        <header class="chat-header">
+            <div class="header-content">
+                <div class="avatar">
+                    <img src="icon.png" alt="集美发展集团停车场助理">
+                </div>
+                <div class="header-info">
+                    <h1>集美发展集团停车场助理</h1>
+                    <div class="status">
+                        <span class="status-dot online"></span>
+                        <span id="status-text">在线</span>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button id="clear-chat" class="action-btn" title="清空对话">
+                        <svg class="clear-icon" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M585.045333 707.072a24.32 24.32 0 0 1-24.32-24.362667V414.421333a24.32 24.32 0 1 1 48.725334 0v268.16a24.448 24.448 0 0 1-24.405334 24.490667z m-146.218666 0a24.32 24.32 0 0 1-24.405334-24.362667V414.421333a24.32 24.32 0 1 1 48.768 0v268.16a24.448 24.448 0 0 1-24.362666 24.490667z m390.144-414.506667h-121.898667V243.797333C707.072 203.434667 674.56 170.666667 634.453333 170.666667H390.058667c-40.362667 0-73.130667 32.768-73.130667 73.130666v48.768H194.986667a24.32 24.32 0 1 0 0 48.725334H829.013333a24.32 24.32 0 1 0 0-48.725334zM365.653333 243.797333c0-13.354667 11.008-24.362667 24.32-24.362666h244.48a23.893333 23.893333 0 0 1 23.808 24.362666v48.768H365.696V243.797333zM682.666667 853.333333H341.418667a73.173333 73.173333 0 0 1-73.130667-73.130666V414.165333a24.32 24.32 0 1 1 48.768 0v366.037334c0 13.482667 11.008 24.362667 24.362667 24.362666h341.418666a24.32 24.32 0 0 0 24.362667-24.362666V415.104a24.32 24.32 0 1 1 48.768 0v365.098667A73.429333 73.429333 0 0 1 682.666667 853.333333z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- 聊天区域 -->
+        <main class="chat-container">
+            <div id="messages" class="messages">
+                <div class="message assistant">
+                    <div class="message-avatar">
+                        <img src="icon.png" alt="小集助手">
+                    </div>
+                    <div class="message-content">
+                        <div class="message-text">
+                            您好！我是集美发展停车场助理小集，能帮助您解决停车场相关的各种疑问和问题。如果您有停车咨询、费用查询、业务办理等需求，请随时告诉我，我会竭诚为您服务！
+                        </div>
+                        <div class="message-time">刚刚</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 输入区域 -->
+            <div class="input-container">
+                <div class="input-wrapper">
+                    <button id="voice-btn" class="voice-btn" title="语音输入">
+                        <svg class="voice-icon" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M522.24 1007.616C245.76 1007.616 20.48 782.336 20.48 505.856S245.76 4.096 522.24 4.096 1024 229.376 1024 505.856 798.72 1007.616 522.24 1007.616z m0-942.08C278.528 65.536 81.92 262.144 81.92 505.856s196.608 440.32 440.32 440.32S962.56 749.568 962.56 505.856 765.952 65.536 522.24 65.536z"></path>
+                            <path d="M403.456 444.416c32.768 34.816 30.72 88.064-4.096 120.832-10.24-12.288-26.624-28.672-57.344-63.488l61.44-57.344zM587.776 782.336L552.96 733.184c75.776-51.2 120.832-139.264 120.832-229.376 0-90.112-40.96-172.032-112.64-225.28l36.864-49.152c86.016 63.488 137.216 165.888 137.216 274.432 0 110.592-55.296 215.04-147.456 278.528z"></path>
+                            <path d="M495.616 677.888l-30.72-53.248c43.008-24.576 69.632-69.632 69.632-118.784 0-47.104-24.576-90.112-63.488-116.736l32.768-51.2c57.344 36.864 92.16 100.352 92.16 167.936 0 71.68-38.912 137.216-100.352 172.032z"></path>
+                        </svg>
+                    </button>
+                    <input 
+                        type="text" 
+                        id="message-input" 
+                        placeholder="请输入您的问题..." 
+                        maxlength="500"
+                        autocomplete="off"
+                    >
+                    <button id="send-btn" class="send-btn" title="发送消息">
+                        发送
+                    </button>
+                </div>
+                <div class="input-tips">
+                    <span class="tip">🅿️ 提示：您可以咨询停车收费、月卡办理、车位预约等问题</span>
+                </div>
+            </div>
+        </main>
+
+        <!-- 加载状态 -->
+        <div id="loading" class="loading hidden">
+            <div class="loading-content">
+                <div class="spinner"></div>
+                <span>对方正在输入...</span>
+            </div>
+        </div>
+
+        <!-- 错误提示 -->
+        <div id="error-toast" class="error-toast hidden">
+            <span id="error-message"></span>
+            <button onclick="hideError()">×</button>
+        </div>
+    </div>
+
+    <!-- 语音录制模态框 -->
+    <div id="voice-modal" class="voice-modal hidden">
+        <div class="voice-modal-content">
+            <div class="voice-animation">
+                <div class="voice-circle"></div>
+                <div class="voice-wave"></div>
+            </div>
+            <div class="voice-text" id="voice-text">正在识别语音...</div>
+            <div class="voice-tips" id="voice-tips">松开按钮结束录音</div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 
