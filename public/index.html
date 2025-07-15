@@ -51,13 +51,6 @@
             <!-- 输入区域 -->
             <div class="input-container">
                 <div class="input-wrapper">
-                    <button id="voice-btn" class="voice-btn" title="语音输入">
-                        <svg class="voice-icon" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M522.24 1007.616C245.76 1007.616 20.48 782.336 20.48 505.856S245.76 4.096 522.24 4.096 1024 229.376 1024 505.856 798.72 1007.616 522.24 1007.616z m0-942.08C278.528 65.536 81.92 262.144 81.92 505.856s196.608 440.32 440.32 440.32S962.56 749.568 962.56 505.856 765.952 65.536 522.24 65.536z"></path>
-                            <path d="M403.456 444.416c32.768 34.816 30.72 88.064-4.096 120.832-10.24-12.288-26.624-28.672-57.344-63.488l61.44-57.344zM587.776 782.336L552.96 733.184c75.776-51.2 120.832-139.264 120.832-229.376 0-90.112-40.96-172.032-112.64-225.28l36.864-49.152c86.016 63.488 137.216 165.888 137.216 274.432 0 110.592-55.296 215.04-147.456 278.528z"></path>
-                            <path d="M495.616 677.888l-30.72-53.248c43.008-24.576 69.632-69.632 69.632-118.784 0-47.104-24.576-90.112-63.488-116.736l32.768-51.2c57.344 36.864 92.16 100.352 92.16 167.936 0 71.68-38.912 137.216-100.352 172.032z"></path>
-                        </svg>
-                    </button>
                     <input 
                         type="text" 
                         id="message-input" 
@@ -70,7 +63,7 @@
                     </button>
                 </div>
                 <div class="input-tips">
-                    <span class="tip">🅿️ 提示：您可以咨询停车收费、月卡办理、车位预约等问题 | 🎤 按住麦克风按钮语音输入</span>
+                    <span class="tip">🅿️ 提示：您可以咨询停车收费、月卡办理、车位预约等问题</span>
                 </div>
             </div>
         </main>
@@ -90,17 +83,6 @@
         </div>
     </div>
 
-    <!-- 语音录制模态框 -->
-    <div id="voice-modal" class="voice-modal hidden">
-        <div class="voice-modal-content">
-            <div class="voice-animation">
-                <div class="voice-circle"></div>
-                <div class="voice-wave"></div>
-            </div>
-            <div class="voice-text" id="voice-text">正在识别语音...</div>
-            <div class="voice-tips" id="voice-tips">松开按钮结束录音</div>
-        </div>
-    </div>
 
     <script src="script.js"></script>
 </body>

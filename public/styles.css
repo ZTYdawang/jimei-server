@@ -277,50 +277,6 @@ body {
     border-color: #07c160;
 }
 
-/* 语音按钮 - 纯图标按钮 */
-.voice-btn {
-    width: 32px;
-    height: 32px;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    transition: all 0.1s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    color: #666;
-    padding: 0;
-}
-
-.voice-icon {
-    width: 24px;
-    height: 24px;
-    fill: currentColor;
-}
-
-.voice-btn:hover {
-    color: #333;
-}
-
-.voice-btn:active {
-    color: #999;
-    transform: scale(0.9);
-}
-
-.voice-btn.recording {
-    color: #fa5151;
-    animation: recordingPulse 1s ease-in-out infinite;
-}
-
-@keyframes recordingPulse {
-    0%, 100% { 
-        opacity: 1;
-    }
-    50% { 
-        opacity: 0.7;
-    }
-}
 
 /* 发送按钮 - 圆角矩形按钮 */
 .send-btn {
@@ -485,87 +441,6 @@ body {
     }
 }
 
-/* 语音模态框 */
-.voice-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.7);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1002;
-}
-
-.voice-modal-content {
-    background: white;
-    padding: 3rem 2rem;
-    border-radius: 2rem;
-    text-align: center;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-}
-
-.voice-animation {
-    position: relative;
-    width: 120px;
-    height: 120px;
-    margin: 0 auto 1.5rem;
-}
-
-.voice-circle {
-    width: 80px;
-    height: 80px;
-    background: #dc3545;
-    border-radius: 50%;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    animation: voicePulse 1.5s ease-in-out infinite;
-}
-
-.voice-wave {
-    width: 120px;
-    height: 120px;
-    border: 3px solid #dc3545;
-    border-radius: 50%;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    animation: voiceWave 1.5s ease-in-out infinite;
-    opacity: 0.7;
-}
-
-@keyframes voicePulse {
-    0%, 100% { transform: translate(-50%, -50%) scale(1); }
-    50% { transform: translate(-50%, -50%) scale(1.1); }
-}
-
-@keyframes voiceWave {
-    0% {
-        transform: translate(-50%, -50%) scale(1);
-        opacity: 0.7;
-    }
-    100% {
-        transform: translate(-50%, -50%) scale(1.3);
-        opacity: 0;
-    }
-}
-
-.voice-text {
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 0.5rem;
-}
-
-.voice-tips {
-    font-size: 0.9rem;
-    color: #666;
-}
 
 /* 工具类 */
 .hidden {
@@ -600,7 +475,7 @@ body {
         max-width: 75%;
     }
     
-    .voice-btn, .send-btn {
+    .send-btn {
         width: 30px;
         height: 30px;
         font-size: 14px;
@@ -619,11 +494,6 @@ body {
         padding: 4px 6px;
     }
     
-    .voice-modal-content {
-        padding: 2rem 1.5rem;
-        margin: 1rem;
-        width: calc(100% - 2rem);
-    }
 }
 
 @media (max-width: 480px) {
