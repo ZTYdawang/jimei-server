@@ -3,7 +3,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const path = require('path');
 require('dotenv').config();
-const qianfan = require('@baidu/qianfan');
+// const qianfan = require('@baidu/qianfan'); // 移除千帆依赖
 const multer = require('multer');
 const axios = require('axios');
 const fs = require('fs');
@@ -82,8 +82,25 @@ app.post('/api/speech-to-text', upload.single('audio'), async (req, res) => {
     }
 });
 
+// 对话接口 (暂时禁用)
+app.post('/api/conversation/chat', (req, res) => {
+    // const { conversation_id, query } = req.body;
 
-// 创建新会话
+    // if (!conversation_id || !query) {
+    //     return res.status(400).json({ success: false, message: '缺少会话ID或查询内容' });
+    // }
+
+    // console.log(`接收到问题: "${query}" (会话ID: ${conversation_id})`);
+    
+    // 暂时返回一个固定的消息，因为千帆功能已移除
+    res.json({
+        success: true,
+        result: "文字对话功能正在升级中，请使用语音输入。"
+    });
+});
+
+
+// 创建新会话 (保留接口，但无实际作用)
 app.post('/api/conversation/create', (req, res) => {
   res.status(200).json({ status: 'ok', message: 'Server is healthy' });
 });
