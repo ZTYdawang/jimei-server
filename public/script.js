@@ -231,6 +231,32 @@ async function startVoiceRecording(e) {
     
     if (isRecording) return;
     
+    // 优先使用Web Speech API
+    if (isUsingSpeechAPI && speechRecognition) {
+        try {
+            isRecording = true;
+            
+            // 更新UI状态
+            elements.voiceBtn.classList.add('recording');
+            elements.voiceModal.classList.remove('hidden');
+            elements.voiceText.textContent = '正在识别语音...';
+            elements.voiceTips.textContent = '请说话，松开按钮结束';
+            
+            // 开始语音识别
+            speechRecognition.start();
+            console.log('🎤 开始语音识别');
+            
+        } catch (error) {
+            console.error('❌ 语音识别启动失败:', error);
+            showError('语音识别启动失败，请重试');
+            isRecording = false;
+            elements.voiceBtn.classList.remove('recording');
+            elements.voiceModal.classList.add('hidden');
+        }
+        return;
+    }
+    
+    // 回退到录音模式（如果支持）
     try {
         const stream = await navigator.mediaDevices.getUserMedia({ 
             audio: {
@@ -281,6 +307,19 @@ function stopVoiceRecording(e) {
     
     if (!isRecording) return;
     
+    // 如果使用Web Speech API
+    if (isUsingSpeechAPI && speechRecognition) {
+        try {
+            speechRecognition.stop();
+            console.log('🎤 停止语音识别');
+        } catch (error) {
+            console.error('❌ 停止语音识别失败:', error);
+        }
+        isRecording = false;
+        elements.voiceBtn.classList.remove('recording');
+        return;
+    }
+    
     // 录音模式
     if (mediaRecorder) {
         mediaRecorder.stop();
@@ -293,25 +332,105 @@ function stopVoiceRecording(e) {
     }
 }
 
+// 语音识别相关变量
+let speechRecognition = null;
+let isUsingSpeechAPI = false;
+
 // 初始化语音识别
 function initSpeechRecognition() {
-    // 检查浏览器是否支持录音
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        console.log('✅ 语音录音功能初始化成功');
+    // 检查浏览器是否支持Web Speech API
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        speechRecognition = new SpeechRecognition();
+        
+        // 配置语音识别
+        speechRecognition.continuous = false;
+        speechRecognition.interimResults = false;
+        speechRecognition.lang = 'zh-CN'; // 设置为中文
+        speechRecognition.maxAlternatives = 1;
+        
+        // 识别结果处理
+        speechRecognition.onresult = function(event) {
+            const transcript = event.results[0][0].transcript;
+            console.log('🎤 语音识别结果:', transcript);
+            
+            // 将识别结果填入输入框
+            elements.messageInput.value = transcript;
+            elements.sendBtn.disabled = false;
+            
+            // 自动聚焦到输入框
+            elements.messageInput.focus();
+            
+            // 隐藏语音模态框
+            elements.voiceModal.classList.add('hidden');
+        };
+        
+        // 错误处理
+        speechRecognition.onerror = function(event) {
+            console.error('❌ 语音识别错误:', event.error);
+            elements.voiceModal.classList.add('hidden');
+            
+            let errorMessage = '语音识别失败，请重试';
+            switch(event.error) {
+                case 'no-speech':
+                    errorMessage = '未检测到语音，请重试';
+                    break;
+                case 'audio-capture':
+                    errorMessage = '无法访问麦克风，请检查权限';
+                    break;
+                case 'not-allowed':
+                    errorMessage = '麦克风权限被拒绝，请允许访问';
+                    break;
+                case 'network':
+                    errorMessage = '网络错误，请检查网络连接';
+                    break;
+            }
+            showError(errorMessage);
+        };
+        
+        // 识别开始
+        speechRecognition.onstart = function() {
+            console.log('🎤 语音识别已开始');
+            elements.voiceText.textContent = '正在听取您的语音...';
+        };
+        
+        // 识别结束
+        speechRecognition.onend = function() {
+            console.log('🎤 语音识别结束');
+            isRecording = false;
+            elements.voiceBtn.classList.remove('recording');
+            elements.voiceModal.classList.add('hidden');
+        };
+        
+        isUsingSpeechAPI = true;
+        console.log('✅ 语音识别初始化成功');
+        
         // 确保按钮可见
         if (elements.voiceBtn) {
             elements.voiceBtn.style.display = 'flex';
             elements.voiceBtn.style.visibility = 'visible';
         }
     } else {
-        console.log('⚠️ 浏览器不支持录音功能');
-        if (elements.voiceBtn) {
-            elements.voiceBtn.style.display = 'none';
+        console.log('⚠️ 浏览器不支持语音识别，尝试使用录音模式');
+        isUsingSpeechAPI = false;
+        
+        // 检查是否至少支持录音
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            console.log('✅ 浏览器支持录音功能');
+            if (elements.voiceBtn) {
+                elements.voiceBtn.style.display = 'flex';
+                elements.voiceBtn.style.visibility = 'visible';
+            }
+        } else {
+            console.log('⚠️ 浏览器不支持录音功能');
+            if (elements.voiceBtn) {
+                elements.voiceBtn.style.display = 'none';
+            }
         }
     }
 }
 
-// 处理语音输入
+// 处理语音输入（用于录音模式回退）
 async function handleVoiceInput(audioBlob) {
     showLoading(true);
     elements.voiceText.textContent = '正在识别语音...';
@@ -359,14 +478,15 @@ async function handleVoiceInput(audioBlob) {
 
 // 检查语音权限
 function checkVoicePermission() {
-    // 检查是否支持录音
+    // 检查是否支持Web Speech API或录音
+    const hasSpeechRecognition = 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window;
     const hasMediaDevices = navigator.mediaDevices && navigator.mediaDevices.getUserMedia;
     
-    if (!hasMediaDevices) {
+    if (!hasSpeechRecognition && !hasMediaDevices) {
         if (elements.voiceBtn) {
             elements.voiceBtn.style.display = 'none';
         }
-        console.warn('⚠️ 当前浏览器不支持录音功能');
+        console.warn('⚠️ 当前浏览器不支持语音功能');
         return;
     }
     
@@ -375,7 +495,12 @@ function checkVoicePermission() {
         elements.voiceBtn.style.display = 'flex';
         elements.voiceBtn.style.visibility = 'visible';
     }
-    console.log('✅ 支持录音功能（使用百度语音识别服务）');
+    
+    if (hasSpeechRecognition) {
+        console.log('✅ 支持Web Speech API语音识别');
+    } else if (hasMediaDevices) {
+        console.log('✅ 支持录音功能（使用百度语音识别服务）');
+    }
 }
 
 // 清空对话
