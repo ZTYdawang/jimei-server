@@ -22,6 +22,14 @@ const elements = {
 
 // 初始化应用
 document.addEventListener('DOMContentLoaded', function() {
+    // 确保语音按钮先显示
+    const voiceBtn = document.getElementById('voice-btn');
+    if (voiceBtn) {
+        voiceBtn.style.display = 'flex';
+        voiceBtn.style.visibility = 'visible';
+        console.log('🔍 强制显示语音按钮');
+    }
+    
     initializeApp();
     bindEvents();
 });
@@ -67,19 +75,21 @@ function bindEvents() {
     });
     
     // 语音按钮事件
-    elements.voiceBtn.addEventListener('mousedown', startVoiceRecording);
-    elements.voiceBtn.addEventListener('mouseup', stopVoiceRecording);
-    elements.voiceBtn.addEventListener('mouseleave', stopVoiceRecording);
-    
-    // 移动端触摸事件
-    elements.voiceBtn.addEventListener('touchstart', startVoiceRecording);
-    elements.voiceBtn.addEventListener('touchend', stopVoiceRecording);
+    if (elements.voiceBtn) {
+        elements.voiceBtn.addEventListener('mousedown', startVoiceRecording);
+        elements.voiceBtn.addEventListener('mouseup', stopVoiceRecording);
+        elements.voiceBtn.addEventListener('mouseleave', stopVoiceRecording);
+        
+        // 移动端触摸事件
+        elements.voiceBtn.addEventListener('touchstart', startVoiceRecording);
+        elements.voiceBtn.addEventListener('touchend', stopVoiceRecording);
+        
+        // 阻止语音按钮的默认行为
+        elements.voiceBtn.addEventListener('contextmenu', e => e.preventDefault());
+    }
     
     // 清空对话
     elements.clearBtn.addEventListener('click', clearChat);
-    
-    // 阻止语音按钮的默认行为
-    elements.voiceBtn.addEventListener('contextmenu', e => e.preventDefault());
 }
 
 // 创建新会话
@@ -288,9 +298,16 @@ function initSpeechRecognition() {
     // 检查浏览器是否支持录音
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         console.log('✅ 语音录音功能初始化成功');
+        // 确保按钮可见
+        if (elements.voiceBtn) {
+            elements.voiceBtn.style.display = 'flex';
+            elements.voiceBtn.style.visibility = 'visible';
+        }
     } else {
         console.log('⚠️ 浏览器不支持录音功能');
-        elements.voiceBtn.style.display = 'none';
+        if (elements.voiceBtn) {
+            elements.voiceBtn.style.display = 'none';
+        }
     }
 }
 
@@ -346,11 +363,18 @@ function checkVoicePermission() {
     const hasMediaDevices = navigator.mediaDevices && navigator.mediaDevices.getUserMedia;
     
     if (!hasMediaDevices) {
-        elements.voiceBtn.style.display = 'none';
+        if (elements.voiceBtn) {
+            elements.voiceBtn.style.display = 'none';
+        }
         console.warn('⚠️ 当前浏览器不支持录音功能');
         return;
     }
     
+    // 确保按钮可见
+    if (elements.voiceBtn) {
+        elements.voiceBtn.style.display = 'flex';
+        elements.voiceBtn.style.visibility = 'visible';
+    }
     console.log('✅ 支持录音功能（使用百度语音识别服务）');
 }
 
