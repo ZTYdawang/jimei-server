@@ -99,13 +99,13 @@ async function createConversation() {
         if (data.success) {
             currentConversationId = data.conversation_id;
             console.log('✅ 会话创建成功:', currentConversationId);
-            updateStatus('在线', true);
+            // updateStatus('在线', true); // 已移除
         } else {
             throw new Error(data.message || '创建会话失败');
         }
     } catch (error) {
         console.error('❌ 创建会话失败:', error);
-        updateStatus('离线', false);
+        // updateStatus('离线', false); // 已移除
         throw error;
     } finally {
         showLoading(false);
@@ -499,18 +499,17 @@ function hideError() {
     elements.errorToast.classList.add('hidden');
 }
 
-// 更新状态
+// 更新在线状态 (此功能已移除，保留函数为空)
 function updateStatus(text, isOnline) {
-    elements.statusText.textContent = text;
-    const statusDot = document.querySelector('.status-dot');
-    
-    if (isOnline) {
-        statusDot.classList.remove('offline');
-        statusDot.classList.add('online');
-    } else {
-        statusDot.classList.remove('online');
-        statusDot.classList.add('offline');
-    }
+    // const dot = elements.statusText.previousElementSibling;
+    // elements.statusText.textContent = text;
+    // if (isOnline) {
+    //     dot.classList.add('online');
+    //     dot.classList.remove('offline');
+    // } else {
+    //     dot.classList.add('offline');
+    //     dot.classList.remove('online');
+    // }
 }
 
 // 工具函数：格式化时间
@@ -537,36 +536,41 @@ function formatTime(date) {
     }
 }
 
-// 工具函数：HTML转义
+// 工具函数：HTML转义 (安全加固)
 function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
+    if (typeof text !== 'string') {
+        console.warn('⚠️ escapeHtml收到了非字符串值:', text);
+        return '';
+    }
+    return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 }
 
-// 连接状态检查
-function checkConnection() {
-    fetch('/api/health')
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                updateStatus('在线', true);
-            } else {
-                updateStatus('连接异常', false);
-            }
-        })
-        .catch(() => {
-            updateStatus('离线', false);
-        });
-}
+// 定期检查连接状态 (此功能已移除)
+// setInterval(checkConnection, 30000); 
 
-// 每30秒检查一次连接状态
-setInterval(checkConnection, 30000);
+// function checkConnection() {
+//     fetch('/api/health')
+//         .then(response => {
+//             if (response.ok) {
+//                 updateStatus('在线', true);
+//             } else {
+//                 updateStatus('连接异常', false);
+//             }
+//         })
+//         .catch(() => {
+//             updateStatus('连接断开', false);
+//         });
+// }
 
 // 页面可见性变化时检查连接
 document.addEventListener('visibilitychange', function() {
     if (!document.hidden) {
-        checkConnection();
+        // checkConnection(); // 已移除
     }
 });
 
