@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API测试页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        .input-group {
+            margin: 10px 0;
+        }
+        input[type="text"] {
+            width: 300px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <h1>百度千帆API测试页面</h1>
+    
+    <div class="test-section">
+        <h2>1. 测试服务器健康状态</h2>
+        <button onclick="testHealth()">测试健康检查</button>
+        <pre id="health-result">点击按钮测试...</pre>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. 创建会话</h2>
+        <button onclick="createConversation()">创建新会话</button>
+        <pre id="conversation-result">点击按钮测试...</pre>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. 发送消息</h2>
+        <div class="input-group">
+            <label>会话ID: </label>
+            <input type="text" id="conversation-id" placeholder="先创建会话获取ID">
+        </div>
+        <div class="input-group">
+            <label>消息内容: </label>
+            <input type="text" id="message-content" value="你好，请介绍一下自己" placeholder="输入要发送的消息">
+        </div>
+        <button onclick="sendMessage()">发送消息</button>
+        <pre id="message-result">填写会话ID和消息后点击测试...</pre>
+    </div>
+
+    <script>
+        let currentConversationId = null;
+
+        async function testHealth() {
+            const resultEl = document.getElementById('health-result');
+            resultEl.textContent = '测试中...';
+            
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                resultEl.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultEl.textContent = `错误: ${error.message}`;
+            }
+        }
+
+        async function createConversation() {
+            const resultEl = document.getElementById('conversation-result');
+            resultEl.textContent = '创建中...';
+            
+            try {
+                const response = await fetch('/api/conversation/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentConversationId = data.conversation_id;
+                    document.getElementById('conversation-id').value = currentConversationId;
+                }
+                
+                resultEl.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultEl.textContent = `错误: ${error.message}`;
+            }
+        }
+
+        async function sendMessage() {
+            const resultEl = document.getElementById('message-result');
+            const conversationId = document.getElementById('conversation-id').value;
+            const messageContent = document.getElementById('message-content').value;
+            
+            if (!conversationId || !messageContent) {
+                resultEl.textContent = '请先创建会话并输入消息内容';
+                return;
+            }
+            
+            resultEl.textContent = '发送中...';
+            
+            try {
+                const response = await fetch('/api/conversation/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        conversation_id: conversationId,
+                        query: messageContent
+                    })
+                });
+                const data = await response.json();
+                resultEl.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultEl.textContent = `错误: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html> 

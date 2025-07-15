@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - QIANFAN_API_KEY=${QIANFAN_API_KEY}
+      - QIANFAN_APP_ID=${QIANFAN_APP_ID}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.jimei-customer-service.rule=Host(`your-domain.com`)"
+      - "traefik.http.routers.jimei-customer-service.tls=true"
+      - "traefik.http.routers.jimei-customer-service.tls.certresolver=letsencrypt"
+
+  # 可选：如果需要Redis缓存
+  # redis:
+  #   image: redis:7-alpine
+  #   restart: unless-stopped
+  #   volumes:
+  #     - redis_data:/data
+  #   command: redis-server --appendonly yes
+
+# volumes:
+#   redis_data: 
