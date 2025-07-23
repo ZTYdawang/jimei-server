@@ -1,5 +1,41 @@
 // 全局变量
 let currentConversationId = null;
+let isWaitingForResponse = false; // 是否正在等待AI回复
+let immediateReplyTimer = null; // 立即回复定时器
+let delayedReplyTimer = null; // 延迟回复定时器
+
+// 自动回复配置
+const AUTO_REPLIES = {
+  IMMEDIATE_REPLIES: [
+    "小集已收到，正在帮你解决",
+    "小集已收到您的问题，正在为您查询",
+    "小集收到了，正在努力为您解答",
+    "小集已接收到您的问题，正在处理中",
+    "小集已收到，马上为您解决",
+    "小集收到您的问题了，正在分析中",
+    "小集已收到消息，正在为您处理",
+    "小集已接收，正在努力解决您的问题"
+  ],
+  DELAYED_REPLIES: [
+    "请耐心等待一下，小集正在加急处理您的问题",
+    "请稍等片刻，小集正在努力为您查找答案",
+    "小集正在仔细分析您的问题，请稍候",
+    "请您稍等，小集正在全力解决您的问题",
+    "抱歉让您久等了，小集正在紧急处理中",
+    "请耐心等候，小集正在为您寻找最佳解决方案",
+    "小集正在认真处理您的问题，请稍等片刻",
+    "请稍作等待，小集正在加快处理速度",
+    "小集正在仔细核查信息，请您稍等",
+    "请您耐心等待，小集正在尽快为您解答",
+    "小集正在努力获取准确信息，请稍候"
+  ],
+  getRandomImmediateReply() {
+    return this.IMMEDIATE_REPLIES[Math.floor(Math.random() * this.IMMEDIATE_REPLIES.length)];
+  },
+  getRandomDelayedReply() {
+    return this.DELAYED_REPLIES[Math.floor(Math.random() * this.DELAYED_REPLIES.length)];
+  }
+};
 
 // DOM元素
 const elements = {
@@ -41,7 +77,7 @@ function bindEvents() {
     
     // 输入框回车发送
     elements.messageInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter' && !e.shiftKey) {
+        if (e.key === 'Enter' && !e.shiftKey && !isWaitingForResponse) {
             e.preventDefault();
             sendMessage();
         }
@@ -50,7 +86,7 @@ function bindEvents() {
     // 输入框输入监听
     elements.messageInput.addEventListener('input', function() {
         const hasText = this.value.trim().length > 0;
-        elements.sendBtn.disabled = !hasText;
+        elements.sendBtn.disabled = !hasText || isWaitingForResponse;
     });
     
     // 清空对话
@@ -59,8 +95,6 @@ function bindEvents() {
 
 // 创建新会话
 async function createConversation() {
-    showLoading(true);
-    
     try {
         const response = await fetch('/api/conversation/create', {
             method: 'POST',
@@ -74,16 +108,12 @@ async function createConversation() {
         if (data.success) {
             currentConversationId = data.conversation_id;
             console.log('✅ 会话创建成功:', currentConversationId);
-            // updateStatus('在线', true); // 已移除
         } else {
             throw new Error(data.message || '创建会话失败');
         }
     } catch (error) {
         console.error('❌ 创建会话失败:', error);
-        // updateStatus('离线', false); // 已移除
         throw error;
-    } finally {
-        showLoading(false);
     }
 }
 
@@ -91,18 +121,36 @@ async function createConversation() {
 async function sendMessage() {
     const text = elements.messageInput.value.trim();
     
-    if (!text || !currentConversationId) {
+    if (!text || !currentConversationId || isWaitingForResponse) {
         return;
     }
+    
+    // 设置等待状态，防止重复发送
+    isWaitingForResponse = true;
     
     // 添加用户消息到界面
     addMessage('user', text);
     
-    // 清空输入框
+    // 清空输入框并禁用
     elements.messageInput.value = '';
+    elements.messageInput.disabled = true;
+    elements.sendBtn.disabled = true;
     
-    // 显示加载状态
-    showLoading(true);
+    // 立即发送自动回复
+    const immediateReply = AUTO_REPLIES.getRandomImmediateReply();
+    immediateReplyTimer = setTimeout(() => {
+        addMessage('assistant', immediateReply);
+        console.log('🤖 立即自动回复:', immediateReply);
+        
+        // 15秒后发送第二条回复（如果AI还没返回）
+        delayedReplyTimer = setTimeout(() => {
+            if (isWaitingForResponse) {
+                const delayedReply = AUTO_REPLIES.getRandomDelayedReply();
+                addMessage('assistant', delayedReply);
+                console.log('🤖 延迟自动回复:', delayedReply);
+            }
+        }, 15000);
+    }, 200); // 稍微延迟一点，让用户消息先显示
     
     try {
         const response = await fetch('/api/conversation/chat', {
@@ -139,7 +187,25 @@ async function sendMessage() {
         showError('消息发送失败，请检查网络后重试');
         // 可以考虑重试机制
     } finally {
-        showLoading(false);
+        // 清理定时器
+        clearAutoReplyTimers();
+        
+        // 恢复等待状态
+        isWaitingForResponse = false;
+        elements.messageInput.disabled = false;
+        elements.sendBtn.disabled = false;
+    }
+}
+
+// 清理自动回复定时器
+function clearAutoReplyTimers() {
+    if (immediateReplyTimer) {
+        clearTimeout(immediateReplyTimer);
+        immediateReplyTimer = null;
+    }
+    if (delayedReplyTimer) {
+        clearTimeout(delayedReplyTimer);
+        delayedReplyTimer = null;
     }
 }
 
@@ -197,6 +263,12 @@ async function clearChat() {
         return;
     }
     
+    // 清理定时器和重置状态
+    clearAutoReplyTimers();
+    isWaitingForResponse = false;
+    elements.messageInput.disabled = false;
+    elements.sendBtn.disabled = true;
+    
     // 清空消息列表
     elements.messages.innerHTML = `
         <div class="message assistant">
@@ -221,24 +293,9 @@ async function clearChat() {
     }
 }
 
-// 显示/隐藏加载状态
+// 显示/隐藏加载状态（已废弃，保留空函数避免错误）
 function showLoading(show) {
-    if (show) {
-        elements.loading.classList.remove('hidden');
-        // 禁用发送按钮和输入框
-        elements.sendBtn.disabled = true;
-        elements.messageInput.disabled = true;
-        // 改变placeholder提示
-        elements.messageInput.placeholder = '对方正在输入...';
-    } else {
-        elements.loading.classList.add('hidden');
-        // 恢复发送按钮和输入框状态
-        elements.messageInput.disabled = false;
-        elements.messageInput.placeholder = '请输入您的问题...';
-        // 根据输入框内容决定发送按钮状态
-        const hasText = elements.messageInput.value.trim().length > 0;
-        elements.sendBtn.disabled = !hasText;
-    }
+    // 不再显示"对方正在输入"状态，改为自动回复机制
 }
 
 // 显示错误提示
