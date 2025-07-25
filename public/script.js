@@ -60,6 +60,12 @@ async function initializeApp() {
     console.log('🚀 应用初始化中...');
     
     try {
+        // 设置欢迎消息的真实时间戳
+        const welcomeTimeElement = document.getElementById('welcome-time');
+        if (welcomeTimeElement) {
+            welcomeTimeElement.textContent = formatTime(new Date());
+        }
+        
         // 创建新会话
         await createConversation();
         
@@ -236,7 +242,7 @@ function addMessage(type, content, timestamp = new Date()) {
             </div>
         `;
     } else {
-        const avatarContent = '<img src="icon.png" alt="集美发展集团智能客服助理小集">';
+        const avatarContent = '<img src="icon.png" alt="集发智能客服小集">';
         messageDiv.innerHTML = `
             <div class="message-avatar">${avatarContent}</div>
             <div class="message-content">
@@ -273,16 +279,22 @@ async function clearChat() {
     elements.messages.innerHTML = `
         <div class="message assistant">
             <div class="message-avatar">
-                <img src="icon.png" alt="集美发展集团智能客服助理小集">
+                <img src="icon.png" alt="集发智能客服小集">
             </div>
             <div class="message-content">
                 <div class="message-text">
-                    您好！我是集美发展集团智能客服助理小集，能帮助您解决各种疑问和问题。如果您有咨询、查询、业务办理等需求，请随时告诉我，我会竭诚为您服务！
+                    您好！我是集发智能客服小集，能帮助您解决各种疑问和问题。如果您有咨询、查询、业务办理等需求，请随时告诉我，我会竭诚为您服务！
                 </div>
-                <div class="message-time">刚刚</div>
+                <div class="message-time" id="initial-welcome-time"></div>
             </div>
         </div>
     `;
+    
+    // 设置欢迎消息的真实时间戳
+    const initialWelcomeTimeElement = document.getElementById('initial-welcome-time');
+    if (initialWelcomeTimeElement) {
+        initialWelcomeTimeElement.textContent = formatTime(new Date());
+    }
     
     // 创建新会话
     try {

@@ -183,7 +183,7 @@ router.get('/health', (req, res) => {
   res.json({
     success: true,
     status: 'healthy',
-    message: '集美发展集团停车场助理服务正常运行',
+    message: '集发智能客服小集服务正常运行',
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
     version: '1.0.0'

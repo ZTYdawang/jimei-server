@@ -1,7 +1,7 @@
 {
   "name": "jimei-parking-assistant",
   "version": "1.0.0",
-  "description": "集美发展集团停车场助理 - 智能客服系统",
+  "description": "集发智能客服小集 - 智能服务系统",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

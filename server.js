@@ -52,7 +52,7 @@ app.use((req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 集美发展集团停车场助理服务器运行在 http://localhost:${PORT}`);
+  console.log(`🚀 集发智能客服小集服务器运行在 http://localhost:${PORT}`);
   console.log(`🅿️ 停车场助手界面: http://localhost:${PORT}`);
   console.log(`🔧 环境: ${process.env.NODE_ENV || 'development'}`);
 }); 
