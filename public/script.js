@@ -66,7 +66,7 @@ async function initializeApp() {
         console.log('✅ 应用初始化完成');
     } catch (error) {
         console.error('❌ 应用初始化失败:', error);
-        showError('停车场助手初始化失败，请刷新页面重试');
+        showError('智能客服助理初始化失败，请刷新页面重试');
     }
 }
 
@@ -236,7 +236,7 @@ function addMessage(type, content, timestamp = new Date()) {
             </div>
         `;
     } else {
-        const avatarContent = '<img src="icon.png" alt="集美发展集团停车场助理">';
+        const avatarContent = '<img src="icon.png" alt="集美发展集团智能客服助理小集">';
         messageDiv.innerHTML = `
             <div class="message-avatar">${avatarContent}</div>
             <div class="message-content">
@@ -273,11 +273,11 @@ async function clearChat() {
     elements.messages.innerHTML = `
         <div class="message assistant">
             <div class="message-avatar">
-                <img src="icon.png" alt="集美发展集团停车场助理">
+                <img src="icon.png" alt="集美发展集团智能客服助理小集">
             </div>
             <div class="message-content">
                 <div class="message-text">
-                    您好！我是集美发展停车场助理小集，能帮助您解决停车场相关的各种疑问和问题。如果您有停车咨询、费用查询、业务办理等需求，请随时告诉我，我会竭诚为您服务！
+                    您好！我是集美发展集团智能客服助理小集，能帮助您解决各种疑问和问题。如果您有咨询、查询、业务办理等需求，请随时告诉我，我会竭诚为您服务！
                 </div>
                 <div class="message-time">刚刚</div>
             </div>
